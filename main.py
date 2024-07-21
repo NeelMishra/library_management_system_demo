@@ -25,74 +25,50 @@ def main():
 
     while True:
         choice = main_menu()
-        if choice == '1':
-            title = input("Enter title: ")
-            author = input("Enter author: ")
-            isbn = input("Enter ISBN: ")
-            try:
+        try:
+            if choice == '1':
+                title = input("Enter title: ")
+                author = input("Enter author: ")
+                isbn = input("Enter ISBN: ")
                 book_manager.add_book(title, author, isbn)
                 print("Book added.")
-            except ValueError as e:
-                print(e)
-        elif choice == '2':
-            book_manager.list_books()
-        elif choice == '3':
-            isbn = input("Enter ISBN: ")
-            try:
-                book = book_manager.find_book_by_isbn(isbn)
-                print(book)
-            except LookupError as e:
-                print(e)
-        elif choice == '4':
-            isbn = input("Enter ISBN: ")
-            try:
+            elif choice == '2':
+                book_manager.list_books()
+            elif choice == '3':
+                isbn = input("Enter ISBN: ")
+                print(book_manager.find_book_by_isbn(isbn))
+            elif choice == '4':
+                isbn = input("Enter ISBN: ")
                 book_manager.remove_book_by_isbn(isbn)
-                storage.remove_entry("books", isbn, "isbn")
                 print("Book removed.")
-            except LookupError as e:
-                print(e)
-        elif choice == '5':
-            name = input("Enter user name: ")
-            user_id = input("Enter user ID: ")
-            try:
+            elif choice == '5':
+                name = input("Enter user name: ")
+                user_id = input("Enter user ID: ")
                 user_manager.add_user(name, user_id)
                 print("User added.")
-            except ValueError as e:
-                print(e)
-        elif choice == '6':
-            user_manager.list_users()
-        elif choice == '7':
-            user_id = input("Enter user ID: ")
-            try:
-                user = user_manager.get_user(user_id)
-                print(user)
-            except KeyError as e:
-                print(e)
-        elif choice == '8':
-            user_id = input("Enter user ID: ")
-            try:
+            elif choice == '6':
+                user_manager.list_users()
+            elif choice == '7':
+                user_id = input("Enter user ID: ")
+                print(user_manager.get_user(user_id))
+            elif choice == '8':
+                user_id = input("Enter user ID: ")
                 user_manager.remove_user(user_id)
-                storage.remove_entry("users", user_id, "user_id")
                 print("User removed.")
-            except KeyError as e:
-                print(e)
-        elif choice == '9':
-            user_id = input("Enter user ID: ")
-            isbn = input("Enter ISBN of the book to checkout: ")
-            try:
+            elif choice == '9':
+                user_id = input("Enter user ID: ")
+                isbn = input("Enter ISBN of the book to checkout: ")
                 checkout_manager.checkout_book(user_id, isbn)
                 print("Book checked out.")
-            except ValueError as e:
-                print(e)
-        elif choice == '10':
-            checkouts = storage.get_checkouts()
-            for checkout in checkouts:
-                print(checkout)
-        elif choice == '11':
-            print("Exiting.")
-            break
-        else:
-            print("Invalid choice, please try again.")
+            elif choice == '10':
+                checkouts = checkout_manager.list_checkouts()
+            elif choice == '11':
+                print("Exiting.")
+                break
+            else:
+                print("Invalid choice, please try again.")
+        except (ValueError, LookupError, KeyError, TypeError) as e:
+            print(f"Error: {e}")  # Enhanced error message clarity
 
 if __name__ == "__main__":
     main()
