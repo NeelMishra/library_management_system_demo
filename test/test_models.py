@@ -1,10 +1,10 @@
 import unittest
 from unittest.mock import MagicMock
-from book import Book
-from check import Checkout
-from user import User
-from storage import Storage
-from models import BookManager, CheckoutManager, UserManager
+from library_management_system_demo.book import Book
+from library_management_system_demo.check import Checkout
+from library_management_system_demo.user import User
+from library_management_system_demo.storage import Storage
+from library_management_system_demo.models import BookManager, CheckoutManager, UserManager
 
 class TestBookManager(unittest.TestCase):
     def setUp(self):
@@ -76,6 +76,8 @@ class TestCheckoutManager(unittest.TestCase):
         """Create a CheckoutManager instance with a mocked storage before each test."""
         self.mock_storage = MagicMock(Storage)
         self.manager = CheckoutManager(self.mock_storage)
+        self.manager.user_manager.add_user("John Doe", "001")
+        self.manager.book_manager.add_book("test_book", "test_author", "9783161484100")
         self.mock_storage.get_checkouts.return_value = []
 
     def test_checkout_book_success(self):
