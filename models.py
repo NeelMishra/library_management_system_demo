@@ -88,6 +88,8 @@ class CheckoutManager:
     def __init__(self, storage: Storage):
         self.checkouts = {}  # Dictionary to track checkouts by ISBN
         self.storage = storage
+        self.user_manager = UserManager(storage)
+        self.book_manager = BookManager(storage)
         self._load_checkouts()
 
     def _load_checkouts(self) -> None:
@@ -95,6 +97,15 @@ class CheckoutManager:
         checkouts = self.storage.get_checkouts()
         for checkout in checkouts:
             self.checkouts[checkout.isbn] = checkout
+    
+    def list_checkouts(self) -> None:
+        """Lists all the checkouts in the system."""
+        
+        if not self.checkouts:
+            print("No checkouts currently.")
+            return
+        for isbn, checkout in self.checkouts.items():
+            print(f" * Checkout - ISBN: {isbn}, User ID: {checkout.user_id}")
 
     def checkout_book(self, user_id: str, isbn: str) -> None:
         """Checkout a book to a user.
@@ -110,6 +121,10 @@ class CheckoutManager:
             raise ValueError("User ID and ISBN must not be empty.")
         if isbn in self.checkouts:
             raise ValueError("This book is already checked out.")
+        # These methods will raise KeyError if the user or book does not exist.
+        self.user_manager.get_user(user_id)  # Validate user existence
+        self.book_manager.find_book_by_isbn(isbn)  # Validate book existence
+        # If the above checks pass then the user and books are present in the database and the book is not checked out
         checkout = Checkout(user_id, isbn)
         self.checkouts[isbn] = checkout
         self.storage.add_checkout(checkout)
