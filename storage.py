@@ -24,18 +24,25 @@ class Storage:
         Returns:
             dict: The data loaded from the file.
         """
-        if not os.path.exists(self.file_path):
-            return {"books": [], "users": [], "checkouts": []}
-
-        with open(self.file_path, 'r') as file:
-            return json.load(file)
+        try:
+            if not os.path.exists(self.file_path):
+                return {"books": [], "users": [], "checkouts": []}
+            with open(self.file_path, 'r') as file:
+                return json.load(file)
+        except json.JSONDecodeError:
+            raise ValueError("Failed to decode JSON from the storage file.")
+        except Exception as e:
+            raise Exception(f"An error occurred while loading data: {e}")
 
     def save_data(self) -> None:
         """
         Saves the current state of data to the JSON file.
         """
-        with open(self.file_path, 'w') as file:
-            json.dump(self.data, file, indent=4)
+        try:
+            with open(self.file_path, 'w') as file:
+                json.dump(self.data, file, indent=4)
+        except Exception as e:
+            raise Exception(f"An error occurred while saving data: {e}")
 
     def add_book(self, book: Book) -> None:
         """
@@ -44,6 +51,8 @@ class Storage:
         Args:
             book (Book): The book to add.
         """
+        if any(book_dict['isbn'] == book.isbn for book_dict in self.data["books"]):
+            raise ValueError("A book with this ISBN already exists.")
         self.data["books"].append({
             "title": book.title,
             "author": book.author,
@@ -58,7 +67,7 @@ class Storage:
         Returns:
             list: A list of Book instances.
         """
-        return [Book(book["title"], book["author"], book["isbn"]) for book in self.data["books"]]
+        return [Book(book_dict["title"], book_dict["author"], book_dict["isbn"]) for book_dict in self.data["books"]]
 
     def add_user(self, user: User) -> None:
         """
@@ -67,6 +76,8 @@ class Storage:
         Args:
             user (User): The user to add.
         """
+        if any(user_dict['user_id'] == user.user_id for user_dict in self.data["users"]):
+            raise ValueError("A user with this user ID already exists.")
         self.data["users"].append({
             "name": user.name,
             "user_id": user.user_id
@@ -80,7 +91,7 @@ class Storage:
         Returns:
             list: A list of User instances.
         """
-        return [User(user["name"], user["user_id"]) for user in self.data["users"]]
+        return [User(user_dict["name"], user_dict["user_id"]) for user_dict in self.data["users"]]
 
     def add_checkout(self, checkout: Checkout) -> None:
         """
@@ -89,6 +100,8 @@ class Storage:
         Args:
             checkout (Checkout): The checkout to add.
         """
+        if any(checkout_dict['isbn'] == checkout.isbn for checkout_dict in self.data["checkouts"]):
+            raise ValueError("This book is already checked out.")
         self.data["checkouts"].append({
             "user_id": checkout.user_id,
             "isbn": checkout.isbn
@@ -102,7 +115,7 @@ class Storage:
         Returns:
             list: A list of Checkout instances.
         """
-        return [Checkout(checkout["user_id"], checkout["isbn"]) for checkout in self.data["checkouts"]]
+        return [Checkout(checkout_dict["user_id"], checkout_dict["isbn"]) for checkout_dict in self.data["checkouts"]]
 
     def remove_entry(self, key: str, entry_id: str, id_field: str) -> None:
         """
