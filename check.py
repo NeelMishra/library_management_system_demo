@@ -1,60 +1,22 @@
+import re
 class Checkout:
     """Represents a single book checkout in the library system."""
     
     def __init__(self, user_id: str, isbn: str):
-        if not user_id or not isbn:
-            raise ValueError("User ID and ISBN must not be empty.")
-        self.user_id = user_id
-        self.isbn = isbn
+        # user_id input validation : Potential failures => user_id is empty, or not an alphanumeric string
+        if not user_id:
+            raise ValueError("User ID must be provided and cannot be empty.")
+        if not isinstance(user_id, str) or not user_id.isdigit(): # We can also have user_id to be integer, but I have set it to string to ensure standardization.
+            raise ValueError("User ID must be numeric string.")
+        # isbin input validation : Potential failures => isbin is empty or not a valid ISBN number
+        if not isbn:
+            raise ValueError("ISBN must not be empty and must be a valid ISBN.")
+        if not re.match(r'^\d{10}(\d{3})?$', isbn): # Using the same ISBN regex as in the Book class for consistency (check wiki for more information on ISBN : https://en.wikipedia.org/wiki/ISBN)
+            raise ValueError("ISBN must be a valid 10 or 13 digit number without spaces or hyphens.")
+        
+        self.user_id = user_id.strip()
+        self.isbn = isbn.strip()
     
     def __str__(self):
         return f"Checkout(User ID: {self.user_id}, ISBN: {self.isbn})"
-
-class CheckoutManager:
-    """Manages book checkouts in the library system."""
     
-    def __init__(self):
-        self.checkouts = {}  # Dictionary to track checkouts by ISBN
-
-    def checkout_book(self, user_id: str, isbn: str):
-        """Checkout a book to a user.
-
-        Args:
-            user_id (str): The ID of the user checking out the book. Must not be empty.
-            isbn (str): The ISBN of the book to checkout. Must not be empty.
-
-        Raises:
-            ValueError: If the book is already checked out or if user_id or isbn is empty.
-        """
-        if not user_id or not isbn:
-            raise ValueError("User ID and ISBN must not be empty.")
-        if isbn in self.checkouts:
-            raise ValueError("This book is already checked out.")
-        self.checkouts[isbn] = Checkout(user_id, isbn)
-        print(f"Book {isbn} checked out to user {user_id}.")
-
-    def find_checkout(self, isbn: str):
-        """Finds which user has checked out a book by ISBN.
-
-        Args:
-            isbn (str): The ISBN of the book.
-
-        Returns:
-            Checkout: The checkout information.
-
-        Raises:
-            KeyError: If the book is not currently checked out.
-        """
-        if isbn not in self.checkouts:
-            raise KeyError("This book is not checked out.")
-        return self.checkouts[isbn]
-
-# Example usage of the CheckoutManager
-if __name__ == "__main__":
-    checkout_manager = CheckoutManager()
-    try:
-        checkout_manager.checkout_book("001", "9783161484100")  # Successful checkout
-        print(checkout_manager.find_checkout("9783161484100"))
-        checkout_manager.checkout_book("002", "9783161484100")  # Attempt to checkout an already checked out book
-    except Exception as e:
-        print(e)  # Handle the error by printing it out
